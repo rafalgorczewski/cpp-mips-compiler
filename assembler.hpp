@@ -10,16 +10,16 @@ using namespace std::literals::string_literals;
 
 class Assembler {
  public:
-  template <typename T>
-  void load_immediate(const std::string& registry, T&& value) {
-    std::string value_str;
-    if constexpr (std::is_same_v<T, const std::string&> ||
-                  std::is_same_v<T, const char*>) {
-      value_str = value;
-    } else {
-      value_str = std::to_string(value);
-    }
-    binary_instruction("li", registry, value_str);
+  void load_immediate(const std::string& registry, const std::string& value) {
+    binary_instruction("li", registry, value);
+  }
+
+  void load_word(const std::string& registry, const std::string& value) {
+    binary_instruction("lw", registry, value);
+  }
+
+  void store_word(const std::string& registry, const std::string& value) {
+    binary_instruction("sw", registry, value);
   }
 
   void add(const std::string& lhs_registry, const std::string& rhs_registry) {
@@ -35,14 +35,19 @@ class Assembler {
     binary_instruction("div", lhs_registry, rhs_registry);
   }
 
-  void to_file(const std::string& file_name = "a.asm") {
-    std::ofstream ofs(file_name);
+  void move(const std::string& lhs_registry, const std::string& rhs_registry) {
+    binary_instruction("move", lhs_registry, rhs_registry);
+  }
+
+  void to_file(const std::string& file_name = "a.asm") const {
+    std::ofstream ofs(file_name, std::ios_base::app);
     if (ofs.is_open()) {
+      ofs << ".text" << std::endl;
       for (auto&& asm_instruction : m_asm) {
-        ofs << asm_instruction << std::endl;
+        ofs << "\t\t" << asm_instruction << std::endl;
       }
     } else {
-      PLOGE << "Could not open " << file_name << " for read!" << std::endl;
+      PLOGE << "Could not open " << file_name << " for write!" << std::endl;
     }
   }
 

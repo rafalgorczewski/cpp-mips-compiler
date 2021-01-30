@@ -62,11 +62,16 @@ line: expression ';'
 
 element: ID           {compiler.push($1);}
 | FDWORD_T            {compiler.push(static_cast<float>($1));}
-| IDWORD_T            {compiler.push(static_cast<int>($1));;}
+| IDWORD_T            {compiler.push(static_cast<int>($1));}
 | '(' element ')'
 ;
 
-variable: ID {PLOGV << "var: " << $1;}
+variable: ID {compiler.push_variable($1);}
+;
+
+type: IWORD_T
+| FDWORD_T
+| STR_T
 ;
 
 expression: '(' expression ')'
@@ -77,7 +82,10 @@ expression: '(' expression ')'
 | element
 ;
 
-assignment: variable '=' expression {PLOGV << "assignment";}
+assignment: variable '=' expression {compiler.assign();}
+;
+
+initialization: type assignment
 ;
 
 %%
