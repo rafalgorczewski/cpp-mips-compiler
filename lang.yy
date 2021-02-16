@@ -8,6 +8,7 @@
 #include <stdlib.h>
 
 #include "compiler.hpp"
+#include "helpers.hpp"
 
 extern int yylex();
 extern int yyparse();
@@ -16,6 +17,7 @@ extern FILE* yyin;
 void yyerror(const char* s);
 
 Compiler compiler;
+
 %}
 
 %union {
@@ -44,11 +46,14 @@ Compiler compiler;
 %token NEWLINE
 
 %right '='
+%right PRINT_OP
 %left '+' '-'
 %left '*' '/'
 
-%start lines
+%type <text> variable
+%type <text> type
 
+%start lines
 %%
 
 lines: line
@@ -57,35 +62,42 @@ lines: line
 
 line: expression ';'
 | assignment ';'
+| initialization ';'
+| print ';'
 | NEWLINE
 ;
 
-element: ID           {compiler.push($1);}
-| FDWORD_T            {compiler.push(static_cast<float>($1));}
-| IDWORD_T            {compiler.push(static_cast<int>($1));}
-| '(' element ')'
-;
-
-variable: ID {compiler.push_variable($1);}
-;
-
-type: IWORD_T
-| FDWORD_T
-| STR_T
-;
-
 expression: '(' expression ')'
-| expression '+' element            {compiler.expression_triplet<Operator::Add>();}
-| expression '-' element            {compiler.expression_triplet<Operator::Sub>();}
-| expression '*' element            {compiler.expression_triplet<Operator::Mul>();}
-| expression '/' element            {compiler.expression_triplet<Operator::Div>();}
+| expression '+' element            {compiler.triplet(Op::Add);}
+| expression '-' element            {compiler.triplet(Op::Sub);}
 | element
 ;
 
-assignment: variable '=' expression {compiler.assign();}
+element: '(' element ')'
+| element '*' entity            {compiler.triplet(Op::Mul);}
+| element '/' entity            {compiler.triplet(Op::Div);}
+| entity
+
+entity: ID            {compiler.push($1);}
+| FDWORD_T            {compiler.push(Data(static_cast<float>($1)));}
+| IDWORD_T            {compiler.push(Data(static_cast<int>($1)));}
+| '(' entity ')'
 ;
 
-initialization: type assignment
+
+variable: ID
+;
+
+assignment: variable '=' expression   {compiler.assign($1);}
+;
+
+type: ID
+;
+
+initialization: type assignment       {}
+;
+
+print: PRINT_OP expression            {compiler.print();}
 ;
 
 %%

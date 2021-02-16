@@ -1,15 +1,25 @@
 .data
-		temp_KcbVSNs4AuOGQjxv: .word 0
-		temp_GFgMn4xpwY3hUIzm: .word 0
-		a: .word 0
+		temp_cTFLVwShMNbaJ3H5: .word 0
+		z: .word 0
+		temp_fc7mPkIvdpBeKOyu: .word 0
+		x: .word 0
 
 .text
-		li $t0, 2
-		li $t1, 1
-		sub $t0, $t0, $t1
-		sw $t0, temp_GFgMn4xpwY3hUIzm
-		lw $t0, temp_GFgMn4xpwY3hUIzm
-		li $t1, 6
+		li $t0, 3
+		sw $t0, x
+		lw $t0, x
+		li $t1, 2
+		mul $t0, $t0, $t1
+		sw $t0, temp_fc7mPkIvdpBeKOyu
+		li $t0, 5
+		lw $t1, temp_fc7mPkIvdpBeKOyu
 		add $t0, $t0, $t1
-		sw $t0, temp_KcbVSNs4AuOGQjxv
-		sw $t0, a
+		sw $t0, temp_cTFLVwShMNbaJ3H5
+		lw $t0, temp_cTFLVwShMNbaJ3H5
+		sw $t0, z
+		li $v0, 1
+		lw $a0, x
+		syscall
+		li $v0, 1
+		lw $a0, z
+		syscall
